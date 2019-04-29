@@ -9,4 +9,4 @@ All profiles are saved in your MyDocuments folder under "Desktop Work Setup" fol
 
 Please report any issues and I'll try to get them fixed.
 
-the ONLY planned add on feature will be adding a costume timer to the individual applications allowed start up time.
+the ONLY planned add on feature will be adding a custume timer to the individual applications allowed start up time.
