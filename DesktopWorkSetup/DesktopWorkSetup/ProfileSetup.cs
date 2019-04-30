@@ -32,7 +32,6 @@ namespace DesktopWorkSetup
 
         private string profileToOpen = string.Empty;
         private Login parentForm;
-        private bool longLoad = false;
 
         public ProfileSetup(string wantedprofile, Login _parentForm)
         {
@@ -68,11 +67,11 @@ namespace DesktopWorkSetup
             {
                 filePath = tbFilePath.Text;
 
-                btnClearFilePath.Enabled = false;
-                btnNext1.Enabled = false;
+                //btnClearFilePath.Enabled = false;
+                //btnNext1.Enabled = false;
 
                 Process.Start(filePath);
-                Thread.Sleep(3000);
+                Thread.Sleep((int)nudWaitForSeconds.Value * 1000);
 
                 btnTooLongLoad.Enabled = true;
 
@@ -82,6 +81,8 @@ namespace DesktopWorkSetup
 
         private void ShowProcesses()
         {
+            lbOpenProcesses.Items.Clear();
+
             Process[] procs = Process.GetProcesses();
 
             foreach (var proc in procs)
@@ -138,6 +139,7 @@ namespace DesktopWorkSetup
                         tbHeight.Text = (windowRect.Bottom - windowRect.Top).ToString();
 
                         windowName = lbOpenProcesses.SelectedItem.ToString();
+                        return;
                     }
                 }
                 catch { }
@@ -152,9 +154,9 @@ namespace DesktopWorkSetup
                 return;
             }
 
-            if (!longLoad && lbOpenProcesses.SelectedItem == null)
+            if (windowName == string.Empty)
             {
-                MessageBox.Show("No window selected.", "Error");
+                MessageBox.Show("Window name not found.", "Error");
                 return;
             }
 
@@ -172,16 +174,42 @@ namespace DesktopWorkSetup
                 Process.Start(filePath);
             }
 
-            Thread.Sleep(3000);
+            Thread.Sleep((int)nudWaitForSeconds.Value * 1000);
             Process proc = GetWindowProcess(windowName);
-            if (proc.MainWindowTitle != windowName)
-            {
-                MessageBox.Show("Window not found.", "Error");
-            }
-            else
+
+            try
             {
                 MoveWindow(proc.MainWindowHandle, windowRect.Left, windowRect.Top, windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top, false);
+
+                if (cbCredentials.Checked)
+                {
+                    string test = "TESTING";
+                    for (int index = 0; index < test.Length; index++)
+                    {
+                        SendKeys.SendWait(test[index].ToString());
+                        Thread.Sleep(10);
+                    }
+                    SendKeys.SendWait("{TAB}");
+                    for (int index = 0; index < test.Length; index++)
+                    {
+                        SendKeys.SendWait(test[index].ToString());
+                        Thread.Sleep(10);
+                    }
+                    SendKeys.SendWait("{ENTER}");
+
+                    if (cbIsNewTab.Checked)
+                    {
+                        SendKeys.SendWait("^1");
+                    }
+                }
             }
+            catch (Exception err)
+            {
+                MessageBox.Show("Program failed to load in time / was not found. window move and/or login was skipped." + Environment.NewLine + err, "Error");
+                return;
+            }
+
+            
         }
 
         private void ClearInputs()
@@ -209,8 +237,6 @@ namespace DesktopWorkSetup
 
             tbNickname.Text = string.Empty;
             btnTooLongLoad.Enabled = false;
-
-            longLoad = false;
         }
 
         private void btnRestart_Click(object sender, EventArgs e)
@@ -230,15 +256,8 @@ namespace DesktopWorkSetup
             }
             else
             {
-                if (windowName == string.Empty)
-                {
-                    appProfiles.Add(new AppProfile(tbNickname.Text, filePath));
-                }
-                else
-                {
-                    appProfiles.Add(new AppProfile(tbNickname.Text, Int32.Parse(tbPositionX.Text), Int32.Parse(tbPositionY.Text), Int32.Parse(tbWidth.Text), Int32.Parse(tbHeight.Text), filePath, windowName, cbCredentials.Checked, cbIsWebsite.Checked, cbIsNewTab.Checked));
-                }
-                
+                appProfiles.Add(new AppProfile(tbNickname.Text, Int32.Parse(tbPositionX.Text), Int32.Parse(tbPositionY.Text), Int32.Parse(tbWidth.Text), Int32.Parse(tbHeight.Text), filePath, windowName, cbCredentials.Checked, cbIsWebsite.Checked, cbIsNewTab.Checked, (int)nudWaitForSeconds.Value * 1000));
+              
                 lbAppProfiles.Items.Add(tbNickname.Text);
 
                 ClearInputs();
@@ -307,7 +326,7 @@ namespace DesktopWorkSetup
         {
             foreach (AppProfile appProfile in appProfiles)
             {
-                appProfile.Run("", "");
+                appProfile.Test();
             }
         }
         
@@ -318,17 +337,7 @@ namespace DesktopWorkSetup
 
         private void btnTooLongLoad_Click(object sender, EventArgs e)
         {
-            cbIsNewTab.Checked = false;
-            cbIsNewTab.Enabled = false;
-            cbCredentials.Checked = false;
-            cbCredentials.Enabled = false;
-            cbIsWebsite.Checked = false;
-            cbIsWebsite.Enabled = false;
-
-            btnAddToProfile.Enabled = true;
-            longLoad = true;
-
-            MessageBox.Show("This application can only be launched, it takes longer than 3 seconds to load so it will not be placed to where you would like.", "Welp");
+            btnNext1_Click(sender, e);
         }
 
         private void btnRemoveSelected_Click(object sender, EventArgs e)
@@ -360,21 +369,16 @@ namespace DesktopWorkSetup
             tbPositionY.Text = appProfiles[lbAppProfiles.SelectedIndex].positionY.ToString();
             tbWidth.Text = appProfiles[lbAppProfiles.SelectedIndex].width.ToString();
             tbHeight.Text = appProfiles[lbAppProfiles.SelectedIndex].height.ToString();
+
+            nudWaitForSeconds.Value = appProfiles[lbAppProfiles.SelectedIndex].loadTime;
         }
 
         private void btnSaveSelected_Click(object sender, EventArgs e)
         {
             if (lbAppProfiles.SelectedItem.ToString() == tbNickname.Text)
             {
-                if (windowName == string.Empty)
-                {
-                    appProfiles[lbAppProfiles.SelectedIndex] = new AppProfile(tbNickname.Text, filePath);
-                }
-                else
-                {
-                    appProfiles[lbAppProfiles.SelectedIndex] = new AppProfile(tbNickname.Text, Int32.Parse(tbPositionX.Text), Int32.Parse(tbPositionY.Text), Int32.Parse(tbWidth.Text), Int32.Parse(tbHeight.Text), filePath, windowName, cbCredentials.Checked, cbIsWebsite.Checked, cbIsNewTab.Checked);
-                }
-
+                appProfiles[lbAppProfiles.SelectedIndex] = new AppProfile(tbNickname.Text, Int32.Parse(tbPositionX.Text), Int32.Parse(tbPositionY.Text), Int32.Parse(tbWidth.Text), Int32.Parse(tbHeight.Text), filePath, windowName, cbCredentials.Checked, cbIsWebsite.Checked, cbIsNewTab.Checked, (int)nudWaitForSeconds.Value * 1000);
+                
                 ClearInputs();
             }
         }

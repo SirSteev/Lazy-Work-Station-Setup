@@ -28,9 +28,11 @@ namespace DesktopWorkSetup
         public bool isWebsite;
         public bool isNewTab;
 
-        private bool longLoad = false;
+        public int loadTime;
 
-        public AppProfile(string _appNickname, int _positionX, int _positionY, int _width, int _height, string _filePath, string _windowName, bool _requiresCredentials, bool _isWebsite, bool _isNewTab)
+        private bool testRun = false;
+
+        public AppProfile(string _appNickname, int _positionX, int _positionY, int _width, int _height, string _filePath, string _windowName, bool _requiresCredentials, bool _isWebsite, bool _isNewTab, int _loadTime)
         {
             appNickname = _appNickname;
 
@@ -45,25 +47,8 @@ namespace DesktopWorkSetup
             requiresCredentials = _requiresCredentials;
             isWebsite = _isWebsite;
             isNewTab = _isNewTab;
-        }
 
-        public AppProfile(string _appNickname, string _filePath)
-        {
-            appNickname = _appNickname;
-
-            positionX = 0;
-            positionY = 0;
-            width = 0;
-            height = 0;
-
-            filePath = _filePath;
-            windowName = string.Empty;
-
-            requiresCredentials = false;
-            isWebsite = false;
-            isNewTab = false;
-
-            longLoad = true;
+            loadTime = _loadTime;
         }
 
         public AppProfile(string[] _parse)
@@ -82,7 +67,7 @@ namespace DesktopWorkSetup
             isWebsite = Convert.ToBoolean(_parse[8]);
             isNewTab = Convert.ToBoolean(_parse[9]);
 
-            longLoad = Convert.ToBoolean(_parse[10]);
+            loadTime = Int32.Parse(_parse[10]);
         }
 
         public string[] GetToFileFormat()
@@ -103,47 +88,56 @@ namespace DesktopWorkSetup
             format[8] = isWebsite.ToString();
             format[9] = isNewTab.ToString();
 
-            format[10] = longLoad.ToString();
+            format[10] = loadTime.ToString();
 
             return format;
         }
 
         public void Run(string userName, string password)
         {
-            if (isWebsite && !isNewTab)
+            try
             {
-                Process process = new Process();
-                process.StartInfo.FileName = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
-                process.StartInfo.Arguments = filePath + " --new-window";
-                process.Start();
+                if (isWebsite && !isNewTab)
+                {
+                    Process process = new Process();
+                    process.StartInfo.FileName = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
+                    process.StartInfo.Arguments = filePath + " --new-window";
+                    process.Start();
+                }
+                else
+                {
+                    Process.Start(filePath);
+                }
             }
-            else
+            catch (Exception err)
             {
-                Process.Start(filePath);
+                MessageBox.Show("Programs file path was not found. Application skipped.", "Error");
+                return;
+            }
+
+
+            Thread.Sleep(loadTime);
+
+            try
+            {
+                MoveWindow(GetWindowProcess(windowName).MainWindowHandle, positionX, positionY, width, height, false);
+            }
+            catch(Exception err)
+            {
+                MessageBox.Show("Program failed to load in time or was not found. window move and/or login was skipped.", "Error");
+                return;
             }
             
-
-            if (!longLoad)
+            if (requiresCredentials)
             {
-                Thread.Sleep(3000);
+                for (int index = 0; index < userName.Length; index++)
+                {
+                    SendKeys.SendWait(userName[index].ToString());
+                    Thread.Sleep(10);
+                }
 
-                try
+                if (!testRun)
                 {
-                    MoveWindow(GetWindowProcess(windowName).MainWindowHandle, positionX, positionY, width, height, false);
-                }
-                catch(Exception err)
-                {
-                    MessageBox.Show("Program failed to load or was not found. window move and/or login was skipped." + Environment.NewLine + err, "Error");
-                    return;
-                }
-                
-                if (requiresCredentials)
-                {
-                    for (int index = 0; index < userName.Length; index++)
-                    {
-                        SendKeys.SendWait(userName[index].ToString());
-                        Thread.Sleep(10);
-                    }
                     SendKeys.SendWait("{TAB}");
                     for (int index = 0; index < password.Length; index++)
                     {
@@ -151,13 +145,20 @@ namespace DesktopWorkSetup
                         Thread.Sleep(10);
                     }
                     SendKeys.SendWait("{ENTER}");
-
-                    if (isNewTab)
-                    {
-                        SendKeys.SendWait("^1");
-                    }
+                    testRun = false;
+                }
+                
+                if (isNewTab)
+                {
+                    SendKeys.SendWait("^1");
                 }
             }
+        }
+
+        public void Test()
+        {
+            testRun = true;
+            Run("TESTING", "");
         }
 
         private Process GetWindowProcess(string windowTitle)

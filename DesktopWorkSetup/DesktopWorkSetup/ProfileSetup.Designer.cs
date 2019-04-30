@@ -65,6 +65,12 @@
             this.label13 = new System.Windows.Forms.Label();
             this.btnTooLongLoad = new System.Windows.Forms.Button();
             this.btnSaveSelected = new System.Windows.Forms.Button();
+            this.nudWaitForSeconds = new System.Windows.Forms.NumericUpDown();
+            this.label14 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.nudWaitForSeconds)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -98,9 +104,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(12, 162);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(245, 13);
+            this.label3.Size = new System.Drawing.Size(299, 13);
             this.label3.TabIndex = 3;
-            this.label3.Text = "2. After we have the file path click the next button.";
+            this.label3.Text = "2. After we have the file path click the \"Run File Path\" button.";
             // 
             // btnNext1
             // 
@@ -108,7 +114,7 @@
             this.btnNext1.Name = "btnNext1";
             this.btnNext1.Size = new System.Drawing.Size(150, 23);
             this.btnNext1.TabIndex = 4;
-            this.btnNext1.Text = "Next";
+            this.btnNext1.Text = "Run File Path";
             this.btnNext1.UseVisualStyleBackColor = true;
             this.btnNext1.Click += new System.EventHandler(this.btnNext1_Click);
             // 
@@ -381,11 +387,11 @@
             // btnTooLongLoad
             // 
             this.btnTooLongLoad.Enabled = false;
-            this.btnTooLongLoad.Location = new System.Drawing.Point(15, 331);
+            this.btnTooLongLoad.Location = new System.Drawing.Point(114, 331);
             this.btnTooLongLoad.Name = "btnTooLongLoad";
-            this.btnTooLongLoad.Size = new System.Drawing.Size(150, 23);
+            this.btnTooLongLoad.Size = new System.Drawing.Size(52, 23);
             this.btnTooLongLoad.TabIndex = 34;
-            this.btnTooLongLoad.Text = "Took Too Long To Load";
+            this.btnTooLongLoad.Text = "Refresh";
             this.btnTooLongLoad.UseVisualStyleBackColor = true;
             this.btnTooLongLoad.Click += new System.EventHandler(this.btnTooLongLoad_Click);
             // 
@@ -399,12 +405,75 @@
             this.btnSaveSelected.UseVisualStyleBackColor = true;
             this.btnSaveSelected.Click += new System.EventHandler(this.btnSaveSelected_Click);
             // 
+            // nudWaitForSeconds
+            // 
+            this.nudWaitForSeconds.Location = new System.Drawing.Point(39, 334);
+            this.nudWaitForSeconds.Maximum = new decimal(new int[] {
+            9,
+            0,
+            0,
+            0});
+            this.nudWaitForSeconds.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.nudWaitForSeconds.Name = "nudWaitForSeconds";
+            this.nudWaitForSeconds.Size = new System.Drawing.Size(27, 20);
+            this.nudWaitForSeconds.TabIndex = 36;
+            this.nudWaitForSeconds.Value = new decimal(new int[] {
+            3,
+            0,
+            0,
+            0});
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(10, 336);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(29, 13);
+            this.label14.TabIndex = 37;
+            this.label14.Text = "Wait";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(66, 336);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(49, 13);
+            this.label15.TabIndex = 38;
+            this.label15.Text = "Seconds";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(17, 22);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(318, 13);
+            this.label16.TabIndex = 39;
+            this.label16.Text = "Or, if you wish to open a Website, check \"Is Website\" then paste ";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(17, 35);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(124, 13);
+            this.label17.TabIndex = 40;
+            this.label17.Text = "the link in the \"File Path\"";
+            // 
             // ProfileSetup
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(471, 521);
+            this.Controls.Add(this.label17);
+            this.Controls.Add(this.label16);
+            this.Controls.Add(this.label15);
+            this.Controls.Add(this.label14);
+            this.Controls.Add(this.nudWaitForSeconds);
             this.Controls.Add(this.btnSaveSelected);
             this.Controls.Add(this.btnTooLongLoad);
             this.Controls.Add(this.label13);
@@ -449,6 +518,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ProfileSetup_FormClosing);
             this.Load += new System.EventHandler(this.ProfileSetup_Load);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.ProfileSetup_DragEnter);
+            ((System.ComponentModel.ISupportInitialize)(this.nudWaitForSeconds)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -492,5 +562,10 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Button btnTooLongLoad;
         private System.Windows.Forms.Button btnSaveSelected;
+        private System.Windows.Forms.NumericUpDown nudWaitForSeconds;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label label17;
     }
 }
