@@ -39,6 +39,7 @@
             this.lbProfiles = new System.Windows.Forms.ListBox();
             this.btnDeleteProfile = new System.Windows.Forms.Button();
             this.btnEditProfile = new System.Windows.Forms.Button();
+            this.btnOpenGitHub = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -138,13 +139,24 @@
             this.btnEditProfile.UseVisualStyleBackColor = true;
             this.btnEditProfile.Click += new System.EventHandler(this.btnEditProfile_Click);
             // 
+            // btnOpenGitHub
+            // 
+            this.btnOpenGitHub.Location = new System.Drawing.Point(12, 373);
+            this.btnOpenGitHub.Name = "btnOpenGitHub";
+            this.btnOpenGitHub.Size = new System.Drawing.Size(195, 23);
+            this.btnOpenGitHub.TabIndex = 11;
+            this.btnOpenGitHub.Text = "GitHub Page";
+            this.btnOpenGitHub.UseVisualStyleBackColor = true;
+            this.btnOpenGitHub.Click += new System.EventHandler(this.btnOpenGitHub_Click);
+            // 
             // Login
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(220, 378);
+            this.ClientSize = new System.Drawing.Size(220, 407);
+            this.Controls.Add(this.btnOpenGitHub);
             this.Controls.Add(this.btnEditProfile);
             this.Controls.Add(this.btnDeleteProfile);
             this.Controls.Add(this.lbProfiles);
@@ -180,6 +192,7 @@
         private System.Windows.Forms.ListBox lbProfiles;
         private System.Windows.Forms.Button btnDeleteProfile;
         private System.Windows.Forms.Button btnEditProfile;
+        private System.Windows.Forms.Button btnOpenGitHub;
     }
 }
 

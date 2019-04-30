@@ -161,6 +161,10 @@ namespace DesktopWorkSetup
             if (MessageBox.Show("Your desktop has been setup.", "Done", MessageBoxButtons.OK) == DialogResult.OK)
                 Application.Exit();
         }
-        
+
+        private void btnOpenGitHub_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/SirSteev/Lazy-Work-Station-Setup");
+        }
     }
 }
