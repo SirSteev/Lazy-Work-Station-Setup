@@ -1,0 +1,11 @@
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\bin\Debug\DesktopWorkSetup.exe.config
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\bin\Debug\DesktopWorkSetup.exe
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\bin\Debug\DesktopWorkSetup.pdb
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.csprojAssemblyReference.cache
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.Login.resources
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.ProfileSetup.resources
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.Properties.Resources.resources
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.csproj.GenerateResource.cache
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.csproj.CoreCompileInputs.cache
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.exe
+C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.pdb
