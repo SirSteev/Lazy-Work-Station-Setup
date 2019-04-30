@@ -269,7 +269,7 @@ namespace DesktopWorkSetup
             tbWidth.Text = appProfiles[lbAppProfiles.SelectedIndex].width.ToString();
             tbHeight.Text = appProfiles[lbAppProfiles.SelectedIndex].height.ToString();
 
-            nudWaitForSeconds.Value = appProfiles[lbAppProfiles.SelectedIndex].loadTime;
+            nudWaitForSeconds.Value = appProfiles[lbAppProfiles.SelectedIndex].loadTime / 1000;
         }
 
         private void btnSaveSelected_Click(object sender, EventArgs e)
