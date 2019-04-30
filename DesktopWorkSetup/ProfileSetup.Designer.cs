@@ -353,7 +353,7 @@
             this.cbIsWebsite.Name = "cbIsWebsite";
             this.cbIsWebsite.Size = new System.Drawing.Size(76, 17);
             this.cbIsWebsite.TabIndex = 30;
-            this.cbIsWebsite.Text = "Is Wedsite";
+            this.cbIsWebsite.Text = "Is Website";
             this.cbIsWebsite.UseVisualStyleBackColor = true;
             this.cbIsWebsite.CheckStateChanged += new System.EventHandler(this.cbIsWebsite_CheckStateChanged);
             // 
