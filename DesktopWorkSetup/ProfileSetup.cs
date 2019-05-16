@@ -62,7 +62,7 @@ namespace DesktopWorkSetup
 			filePath = tbFilePath.Text = string.Empty;
 		}
 
-		private void lbOpenProcesses_SelectedValueChanged(object sender, EventArgs e)
+		private void GrabWindowData()
 		{
 			Process[] procs = Process.GetProcesses();
 
@@ -84,6 +84,14 @@ namespace DesktopWorkSetup
 					}
 				}
 				catch { }
+			}
+		}
+
+		private void lbOpenProcesses_SelectedValueChanged(object sender, EventArgs e)
+		{
+			if (lbOpenProcesses.SelectedItem != null)
+			{
+				GrabWindowData();
 			}
 		}
 
@@ -456,7 +464,10 @@ namespace DesktopWorkSetup
 
 		private void BtnRegrabProcessProperties_Click(object sender, EventArgs e)
 		{
-			ShowProcesses();
+			if (lbOpenProcesses.SelectedItem != null)
+			{
+				GrabWindowData();
+			}
 		}
 
 		private void CbCredentials_CheckedChanged(object sender, EventArgs e)
