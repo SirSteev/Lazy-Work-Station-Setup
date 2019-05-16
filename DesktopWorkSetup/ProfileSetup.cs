@@ -1,373 +1,475 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.IO;
 
 namespace DesktopWorkSetup
 {
-    public partial class ProfileSetup : Form
-    {
-        [DllImport("user32.dll")]
-        public static extern bool GetWindowRect(IntPtr hwnd, ref Rect rectangle);
+	public partial class ProfileSetup : Form
+	{
+		[DllImport("user32.dll")]
+		public static extern bool GetWindowRect(IntPtr hwnd, ref Rect rectangle);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+		[DllImport("user32.dll", SetLastError = true)]
+		internal static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
-        public struct Rect
-        {
-            public int Left { get; set; }
-            public int Top { get; set; }
-            public int Right { get; set; }
-            public int Bottom { get; set; }
-        }
+		public struct Rect
+		{
+			public int Left { get; set; }
+			public int Top { get; set; }
+			public int Right { get; set; }
+			public int Bottom { get; set; }
+		}
 
-        private string filePath = string.Empty;
-        private string windowName = string.Empty;
-        private Rect windowRect = new Rect();
+		private string filePath = string.Empty;
+		private string windowName = string.Empty;
+		private Rect windowRect = new Rect();
 
-        private List<AppProfile> appProfiles = new List<AppProfile>();
+		private readonly List<AppProfile> appProfiles = new List<AppProfile>();
 
-        private string profileToOpen = string.Empty;
-        private Login parentForm;
+		private string profileToOpen = string.Empty;
+		private readonly Login parentForm;
 
-        public ProfileSetup(string wantedprofile, Login _parentForm)
-        {
-            InitializeComponent();
-            profileToOpen = wantedprofile;
+		public ProfileSetup(string wantedprofile, Login _parentForm)
+		{
+			InitializeComponent();
+			profileToOpen = wantedprofile;
 
-            parentForm = _parentForm;
-        }
+			parentForm = _parentForm;
+		}
 
-        private void ProfileSetup_DragEnter(object sender, DragEventArgs e)
-        {
-            if (tbFilePath.Text == string.Empty)
-            {
-                if (e.Data.GetDataPresent(DataFormats.FileDrop))
-                {
-                    string[] filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
-                    if (filePaths[0] != null)
-                    {
-                        filePath = filePaths[0];
-                        tbFilePath.Text = filePath;
-                    }
-                }
-            }
-        }
-        
-        private void btnClearFilePath_Click(object sender, EventArgs e)
-        {
-            filePath = tbFilePath.Text = string.Empty;
-        }
+		private void ProfileSetup_DragEnter(object sender, DragEventArgs e)
+		{
+			if (tbFilePath.Text == string.Empty)
+			{
+				if (e.Data.GetDataPresent(DataFormats.FileDrop))
+				{
+					string[] filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+					if (filePaths[0] != null)
+					{
+						filePath = filePaths[0];
+						tbFilePath.Text = filePath;
+					}
+				}
+			}
+		}
 
-        private void lbOpenProcesses_SelectedValueChanged(object sender, EventArgs e)
-        {
-            Process[] procs = Process.GetProcesses();
+		private void btnClearFilePath_Click(object sender, EventArgs e)
+		{
+			filePath = tbFilePath.Text = string.Empty;
+		}
 
-            foreach (var proc in procs)
-            {
-                try
-                {
-                    if (proc.MainWindowTitle == lbOpenProcesses.SelectedItem.ToString())
-                    {
-                        GetWindowRect(proc.MainWindowHandle, ref windowRect);
+		private void lbOpenProcesses_SelectedValueChanged(object sender, EventArgs e)
+		{
+			Process[] procs = Process.GetProcesses();
 
-                        tbPositionX.Text = windowRect.Left.ToString();
-                        tbPositionY.Text = windowRect.Top.ToString();
-                        tbWidth.Text = (windowRect.Right - windowRect.Left).ToString();
-                        tbHeight.Text = (windowRect.Bottom - windowRect.Top).ToString();
+			foreach (var proc in procs)
+			{
+				try
+				{
+					if (proc.MainWindowTitle == lbOpenProcesses.SelectedItem.ToString())
+					{
+						GetWindowRect(proc.MainWindowHandle, ref windowRect);
 
-                        windowName = lbOpenProcesses.SelectedItem.ToString();
-                        return;
-                    }
-                }
-                catch { }
-            }
-        }
+						tbPositionX.Text = windowRect.Left.ToString();
+						tbPositionY.Text = windowRect.Top.ToString();
+						tbWidth.Text = (windowRect.Right - windowRect.Left).ToString();
+						tbHeight.Text = (windowRect.Bottom - windowRect.Top).ToString();
 
-        private void btnTest_Click(object sender, EventArgs e)
-        {
-            if (filePath == string.Empty)
-            {
-                MessageBox.Show("No file path.", "Error");
-                return;
-            }
+						windowName = lbOpenProcesses.SelectedItem.ToString();
+						return;
+					}
+				}
+				catch { }
+			}
+		}
 
-            if (windowName == string.Empty)
-            {
-                MessageBox.Show("Window name not found.", "Error");
-                return;
-            }
+		private void btnTest_Click(object sender, EventArgs e)
+		{
+			if (filePath == string.Empty)
+			{
+				ErrorWindow.ShowBox("Error", "No file path.", this);
+				return;
+			}
 
-            btnAddToProfile.Enabled = true;
+			if (windowName == string.Empty)
+			{
+				ErrorWindow.ShowBox("Error", "Window name not found.", this);
+				return;
+			}
 
-            if (cbIsWebsite.Checked && !cbIsNewTab.Checked)
-            {
-                Process process = new Process();
-                process.StartInfo.FileName = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
-                process.StartInfo.Arguments = filePath + " --new-window";
-                process.Start();
-            }
-            else
-            {
-                Process.Start(filePath);
-            }
+			btnAddToProfile.Enabled = true;
 
-            Thread.Sleep((int)nudWaitForSeconds.Value * 1000);
-            Process proc = GetWindowProcess(windowName);
+			if (cbIsWebsite.Checked && !cbIsNewTab.Checked)
+			{
+				Process process = new Process();
+				process.StartInfo.FileName = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
+				process.StartInfo.Arguments = filePath + " --new-window";
+				process.Start();
+			}
+			else
+			{
+				Process.Start(filePath);
+			}
 
-            try
-            {
-                MoveWindow(proc.MainWindowHandle, windowRect.Left, windowRect.Top, windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top, false);
+			Thread.Sleep((int)nudWaitForSeconds.Value * 1000);
+			Process proc = GetWindowProcess(windowName);
 
-                if (cbCredentials.Checked)
-                {
-                    string test = "TESTING";
-                    for (int index = 0; index < test.Length; index++)
-                    {
-                        SendKeys.SendWait(test[index].ToString());
-                        Thread.Sleep(10);
-                    }
-                }
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show("Program failed to load in time / was not found.", "Error");
-                return;
-            }
+			try
+			{
+				MoveWindow(proc.MainWindowHandle, windowRect.Left, windowRect.Top, windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top, false);
 
-            
-        }
-        
-        private void btnRestart_Click(object sender, EventArgs e)
-        {
-            ClearInputs();
-        }
+				if (cbCredentials.Checked)
+				{
+					string test = "TESTING";
+					for (int index = 0; index < test.Length; index++)
+					{
+						SendKeys.SendWait(test[index].ToString());
+						Thread.Sleep(10);
+					}
+				}
+			}
+			catch
+			{
+				ErrorWindow.ShowBox("Error", "Program failed to load in time / was not found.", this);
+				return;
+			}
 
-        private void btnAddToProfile_Click(object sender, EventArgs e)
-        {
-            if (tbNickname.Text == string.Empty)
-            {
-                MessageBox.Show("Application profile needs a nickname.", "Error");
-            }
-            else if (lbAppProfiles.Items.Contains(tbNickname.Text))
-            {
-                MessageBox.Show("That nickname is already in use.", "Error");
-            }
-            else
-            {
-                appProfiles.Add(new AppProfile(tbNickname.Text, Int32.Parse(tbPositionX.Text), Int32.Parse(tbPositionY.Text), Int32.Parse(tbWidth.Text), Int32.Parse(tbHeight.Text), filePath, windowName, cbCredentials.Checked, cbIsWebsite.Checked, cbIsNewTab.Checked, (int)nudWaitForSeconds.Value * 1000));
-              
-                lbAppProfiles.Items.Add(tbNickname.Text);
 
-                ClearInputs();
-            }
-            
-        }
+		}
 
-        private void cbIsWebsite_CheckStateChanged(object sender, EventArgs e)
-        {
-            if (cbIsWebsite.Checked)
-            {
-                cbIsNewTab.Enabled = true;
-                tbFilePath.Enabled = true;
-            }
-            else
-            {
-                cbIsNewTab.Enabled = false;
-                tbFilePath.Enabled = false;
-                tbFilePath.Text = string.Empty;
-            }
-        }
+		private void btnRestart_Click(object sender, EventArgs e)
+		{
+			ClearInputs();
+		}
 
-        private void btnFinished_Click(object sender, EventArgs e)
-        {
-            if (tbProfileName.Text == string.Empty)
-            {
-                MessageBox.Show("Profile needs a name.", "Error");
-                return;
-            }
+		private void btnAddToProfile_Click(object sender, EventArgs e)
+		{
+			if (tbNickname.Text == string.Empty)
+			{
+				ErrorWindow.ShowBox("Error", "Application profile needs a nickname.", this);
+			}
+			else if (lbAppProfiles.Items.Contains(tbNickname.Text))
+			{
+				ErrorWindow.ShowBox("Error", "That nickname is already in use.", this);
+			}
+			else
+			{
+				appProfiles.Add(new AppProfile(tbNickname.Text, Int32.Parse(tbPositionX.Text), Int32.Parse(tbPositionY.Text), Int32.Parse(tbWidth.Text), Int32.Parse(tbHeight.Text), filePath, windowName, cbCredentials.Checked, cbAutoLogin.Checked, cbIsWebsite.Checked, cbIsNewTab.Checked, (int)nudWaitForSeconds.Value * 1000));
 
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments), "Desktop Work Setup", tbProfileName.Text);
+				lbAppProfiles.Items.Add(tbNickname.Text);
 
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            
-            foreach (AppProfile appProfile in appProfiles)
-            {
-                File.WriteAllLines(path + "\\" + appProfiles.IndexOf(appProfile) + appProfile.appNickname + ".txt", appProfile.GetToFileFormat());
-            }
+				ClearInputs();
+			}
 
-            parentForm.ProfileFormExit(false);
-        }
+		}
 
-        private void ProfileSetup_Load(object sender, EventArgs e)
-        {
-            if (profileToOpen != string.Empty)
-            {
-                tbProfileName.Text = profileToOpen;
+		private void cbIsWebsite_CheckStateChanged(object sender, EventArgs e)
+		{
+			if (cbIsWebsite.Checked)
+			{
+				cbIsNewTab.Enabled = true;
+				tbFilePath.Enabled = true;
+			}
+			else
+			{
+				cbIsNewTab.Checked = false;
+				cbIsNewTab.Enabled = false;
+				tbFilePath.Enabled = false;
+				tbFilePath.Text = string.Empty;
+			}
+		}
 
-                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments), "Desktop Work Setup", profileToOpen);
+		private void btnFinished_Click(object sender, EventArgs e)
+		{
+			if (tbProfileName.Text == string.Empty)
+			{
+				ErrorWindow.ShowBox("Error", "Profile needs a name.", this);
+				return;
+			}
 
-                string[] files = Directory.GetFiles(path);
+			string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments), "Desktop Work Setup", tbProfileName.Text);
 
-                foreach (string file in files)
-                {
-                    string[] fileLines = File.ReadAllLines(file);
-                    appProfiles.Add(new AppProfile(fileLines));
-                    lbAppProfiles.Items.Add(fileLines[0]);
-                }
+			if (!Directory.Exists(path))
+			{
+				Directory.CreateDirectory(path);
+			}
 
-                tbProfileName.Text = profileToOpen;
-            }
-        }
+			foreach (string file in Directory.GetFiles(path))
+			{
+				File.Delete(file);
+			}
 
-        private void btnTestAll_Click(object sender, EventArgs e)
-        {
-            foreach (AppProfile appProfile in appProfiles)
-            {
-                appProfile.Test();
-            }
-        }
-        
-        private void ProfileSetup_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            parentForm.ProfileFormExit(true);
-        }
-        
-        private void btnRemoveSelected_Click(object sender, EventArgs e)
-        {
-            if (lbAppProfiles.SelectedItem != null)
-            {
-                appProfiles.RemoveAt(lbAppProfiles.SelectedIndex);
-                lbAppProfiles.Items.RemoveAt(lbAppProfiles.SelectedIndex);
-            }
-            else
-            {
-                MessageBox.Show("No application has been selected.", "Error");
-            }
-            
-        }
+			foreach (AppProfile appProfile in appProfiles)
+			{
+				File.WriteAllLines(path + "\\" + appProfiles.IndexOf(appProfile) + appProfile.appNickname + ".txt", appProfile.GetToFileFormat());
+			}
 
-        private void btnEditSelected_Click(object sender, EventArgs e)
-        {
-            ClearInputs();
+			parentForm.ProfileFormExit(false);
+		}
 
-            tbNickname.Text = appProfiles[lbAppProfiles.SelectedIndex].appNickname;
-            tbFilePath.Text = appProfiles[lbAppProfiles.SelectedIndex].filePath;
+		private void ProfileSetup_Load(object sender, EventArgs e)
+		{
+			btnMoveUpSelected.Enabled = false;
+			btnMoveDownSelected.Enabled = false;
 
-            cbCredentials.Checked = appProfiles[lbAppProfiles.SelectedIndex].requiresCredentials;
-            cbIsWebsite.Checked = appProfiles[lbAppProfiles.SelectedIndex].isWebsite;
-            cbIsNewTab.Checked = appProfiles[lbAppProfiles.SelectedIndex].isNewTab;
+			btnEditSelected.Enabled = false;
+			btnRemoveSelected.Enabled = false;
+			btnSaveSelected.Enabled = false;
 
-            tbPositionX.Text = appProfiles[lbAppProfiles.SelectedIndex].positionX.ToString();
-            tbPositionY.Text = appProfiles[lbAppProfiles.SelectedIndex].positionY.ToString();
-            tbWidth.Text = appProfiles[lbAppProfiles.SelectedIndex].width.ToString();
-            tbHeight.Text = appProfiles[lbAppProfiles.SelectedIndex].height.ToString();
+			btnFinished.Enabled = false;
 
-            nudWaitForSeconds.Value = appProfiles[lbAppProfiles.SelectedIndex].loadTime / 1000;
-        }
+			if (profileToOpen != string.Empty)
+			{
+				profileToOpen = profileToOpen.Replace("*", "");
 
-        private void btnSaveSelected_Click(object sender, EventArgs e)
-        {
-            if (lbAppProfiles.SelectedItem.ToString() == tbNickname.Text)
-            {
-                appProfiles[lbAppProfiles.SelectedIndex] = new AppProfile(tbNickname.Text, Int32.Parse(tbPositionX.Text), Int32.Parse(tbPositionY.Text), Int32.Parse(tbWidth.Text), Int32.Parse(tbHeight.Text), filePath, windowName, cbCredentials.Checked, cbIsWebsite.Checked, cbIsNewTab.Checked, (int)nudWaitForSeconds.Value * 1000);
-                
-                ClearInputs();
-            }
-        }
+				tbProfileName.Text = profileToOpen;
 
-        private void btnRunFilePath_Click(object sender, EventArgs e)
-        {
-            if (tbFilePath.Text == string.Empty)
-            {
-                MessageBox.Show("File path is needed to continue.", "Error");
-            }
-            else
-            {
-                filePath = tbFilePath.Text;
+				string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments), "Desktop Work Setup", profileToOpen);
 
-                Process.Start(filePath);
-                Thread.Sleep((int)nudWaitForSeconds.Value * 1000);
+				string[] files = Directory.GetFiles(path);
 
-                btnRefreshOpenProcess.Enabled = true;
+				foreach (string file in files)
+				{
+					string[] fileLines = File.ReadAllLines(file);
+					appProfiles.Add(new AppProfile(fileLines));
+					lbAppProfiles.Items.Add(fileLines[0]);
+				}
 
-                ShowProcesses();
-            }
-        }
+				tbProfileName.Text = profileToOpen;
+			}
+		}
 
-        private void btnRefreshOpenProcess_Click(object sender, EventArgs e)
-        {
-            ShowProcesses();
-        }
+		private void btnTestAll_Click(object sender, EventArgs e)
+		{
+			foreach (AppProfile appProfile in appProfiles)
+			{
+				appProfile.Test(this);
+			}
 
-        private void ClearInputs()
-        {
-            btnClearFilePath.Enabled = true;
-            btnNext1.Enabled = true;
+			btnFinished.Enabled = true;
+		}
 
-            tbFilePath.Text = string.Empty;
+		private void ProfileSetup_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			parentForm.ProfileFormExit(true);
+		}
 
-            tbPositionX.Text = string.Empty;
-            tbPositionY.Text = string.Empty;
-            tbWidth.Text = string.Empty;
-            tbHeight.Text = string.Empty;
+		private void btnRemoveSelected_Click(object sender, EventArgs e)
+		{
+			if (lbAppProfiles.SelectedItem != null)
+			{
+				appProfiles.RemoveAt(lbAppProfiles.SelectedIndex);
+				lbAppProfiles.Items.RemoveAt(lbAppProfiles.SelectedIndex);
 
-            lbOpenProcesses.Items.Clear();
+				btnFinished.Enabled = false;
+			}
+			else
+			{
+				ErrorWindow.ShowBox("Error", "No application has been selected.", this);
+			}
 
-            btnAddToProfile.Enabled = false;
+		}
 
-            cbIsNewTab.Checked = false;
-            cbIsNewTab.Enabled = false;
-            cbCredentials.Checked = false;
-            cbCredentials.Enabled = true;
-            cbIsWebsite.Checked = false;
-            cbIsWebsite.Enabled = true;
+		private void btnEditSelected_Click(object sender, EventArgs e)
+		{
+			ClearInputs();
 
-            tbNickname.Text = string.Empty;
-            btnRefreshOpenProcess.Enabled = false;
-        }
+			tbNickname.Text = appProfiles[lbAppProfiles.SelectedIndex].appNickname;
+			tbFilePath.Text = filePath = appProfiles[lbAppProfiles.SelectedIndex].filePath;
+			windowName = appProfiles[lbAppProfiles.SelectedIndex].windowName;
 
-        private void ShowProcesses()
-        {
-            lbOpenProcesses.Items.Clear();
+			cbCredentials.Checked = appProfiles[lbAppProfiles.SelectedIndex].requiresCredentials;
+			cbIsWebsite.Checked = appProfiles[lbAppProfiles.SelectedIndex].isWebsite;
+			cbIsNewTab.Checked = appProfiles[lbAppProfiles.SelectedIndex].isNewTab;
 
-            Process[] procs = Process.GetProcesses();
+			tbPositionX.Text = appProfiles[lbAppProfiles.SelectedIndex].positionX.ToString();
+			tbPositionY.Text = appProfiles[lbAppProfiles.SelectedIndex].positionY.ToString();
+			tbWidth.Text = appProfiles[lbAppProfiles.SelectedIndex].width.ToString();
+			tbHeight.Text = appProfiles[lbAppProfiles.SelectedIndex].height.ToString();
 
-            foreach (var proc in procs)
-            {
-                try
-                {
-                    if (proc.MainWindowTitle.Length > 0)
-                    {
-                        lbOpenProcesses.Items.Add(proc.MainWindowTitle);
-                    }
-                }
-                catch { }
-            }
-        }
+			nudWaitForSeconds.Value = appProfiles[lbAppProfiles.SelectedIndex].loadTime / 1000;
 
-        private Process GetWindowProcess(string windowTitle)
-        {
-            Process[] procs = Process.GetProcesses();
+			btnFinished.Enabled = false;
+		}
 
-            foreach (var proc in procs)
-            {
-                try
-                {
-                    if (proc.MainWindowTitle == windowTitle)
-                    {
-                        return proc;
-                    }
-                }
-                catch { }
-            }
-            return new Process();
-        }
-    }
+		private void btnSaveSelected_Click(object sender, EventArgs e)
+		{
+			if (lbAppProfiles.SelectedItem.ToString() == tbNickname.Text)
+			{
+				appProfiles[lbAppProfiles.SelectedIndex] = new AppProfile(tbNickname.Text, Int32.Parse(tbPositionX.Text), Int32.Parse(tbPositionY.Text), Int32.Parse(tbWidth.Text), Int32.Parse(tbHeight.Text), filePath, windowName, cbCredentials.Checked, cbAutoLogin.Checked, cbIsWebsite.Checked, cbIsNewTab.Checked, (int)nudWaitForSeconds.Value * 1000);
+
+				ClearInputs();
+
+				btnFinished.Enabled = false;
+			}
+		}
+
+		private void btnRunFilePath_Click(object sender, EventArgs e)
+		{
+			if (tbFilePath.Text == string.Empty)
+			{
+				ErrorWindow.ShowBox("Error", "File path is needed to continue.", this);
+			}
+			else
+			{
+				filePath = tbFilePath.Text;
+
+				Process.Start(filePath);
+				Thread.Sleep((int)nudWaitForSeconds.Value * 1000);
+
+				btnRefreshOpenProcess.Enabled = true;
+
+				ShowProcesses();
+			}
+		}
+
+		private void btnRefreshOpenProcess_Click(object sender, EventArgs e)
+		{
+			ShowProcesses();
+		}
+
+		private void ClearInputs()
+		{
+			btnClearFilePath.Enabled = true;
+			btnNext1.Enabled = true;
+
+			tbFilePath.Text = filePath = string.Empty;
+			windowName = string.Empty;
+
+			tbPositionX.Text = string.Empty;
+			tbPositionY.Text = string.Empty;
+			tbWidth.Text = string.Empty;
+			tbHeight.Text = string.Empty;
+
+			lbOpenProcesses.Items.Clear();
+
+			btnAddToProfile.Enabled = false;
+
+			cbIsNewTab.Checked = false;
+			cbIsNewTab.Enabled = false;
+			cbCredentials.Checked = false;
+			cbCredentials.Enabled = true;
+			cbIsWebsite.Checked = false;
+			cbIsWebsite.Enabled = true;
+
+			tbNickname.Text = string.Empty;
+			btnRefreshOpenProcess.Enabled = false;
+		}
+
+		private void ShowProcesses()
+		{
+			lbOpenProcesses.Items.Clear();
+
+			Process[] procs = Process.GetProcesses();
+
+			foreach (var proc in procs)
+			{
+				try
+				{
+					if (proc.MainWindowTitle.Length > 0)
+					{
+						lbOpenProcesses.Items.Add(proc.MainWindowTitle);
+					}
+				}
+				catch { }
+			}
+		}
+
+		private Process GetWindowProcess(string windowTitle)
+		{
+			Process[] procs = Process.GetProcesses();
+
+			foreach (var proc in procs)
+			{
+				try
+				{
+					if (proc.MainWindowTitle == windowTitle)
+					{
+						return proc;
+					}
+				}
+				catch { }
+			}
+			return new Process();
+		}
+
+		private void LbAppProfiles_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (lbAppProfiles.SelectedItem != null)
+			{
+				btnMoveUpSelected.Enabled = true;
+				btnMoveDownSelected.Enabled = true;
+
+				btnEditSelected.Enabled = true;
+				btnRemoveSelected.Enabled = true;
+				btnSaveSelected.Enabled = true;
+			}
+		}
+
+		private void BtnMoveUpSelected_Click(object sender, EventArgs e)
+		{
+			if (lbAppProfiles.SelectedItem != null)
+			{
+				if (lbAppProfiles.SelectedIndex - 1 < 0) return;
+
+				int selectedIndex = lbAppProfiles.SelectedIndex;
+
+				AppProfile tempAppProfile = appProfiles[selectedIndex];
+				appProfiles[selectedIndex] = appProfiles[selectedIndex - 1];
+				appProfiles[selectedIndex - 1] = tempAppProfile;
+
+				object tempObj = lbAppProfiles.SelectedItem;
+				lbAppProfiles.Items[selectedIndex] = lbAppProfiles.Items[selectedIndex - 1];
+				lbAppProfiles.Items[selectedIndex - 1] = tempObj;
+
+				lbAppProfiles.SelectedIndex--;
+
+				btnFinished.Enabled = false;
+			}
+		}
+
+		private void BtnMoveDownSelected_Click(object sender, EventArgs e)
+		{
+			if (lbAppProfiles.SelectedItem != null)
+			{
+				if (lbAppProfiles.SelectedIndex + 1 >= lbAppProfiles.Items.Count) return;
+
+				int selectedIndex = lbAppProfiles.SelectedIndex;
+
+				AppProfile tempAppProfile = appProfiles[selectedIndex];
+				appProfiles[selectedIndex] = appProfiles[selectedIndex + 1];
+				appProfiles[selectedIndex + 1] = tempAppProfile;
+
+				object tempObj = lbAppProfiles.SelectedItem;
+				lbAppProfiles.Items[selectedIndex] = lbAppProfiles.Items[selectedIndex + 1];
+				lbAppProfiles.Items[selectedIndex + 1] = tempObj;
+
+				lbAppProfiles.SelectedIndex++;
+
+				btnFinished.Enabled = false;
+			}
+		}
+
+		private void BtnRegrabProcessProperties_Click(object sender, EventArgs e)
+		{
+			ShowProcesses();
+		}
+
+		private void CbCredentials_CheckedChanged(object sender, EventArgs e)
+		{
+			if (cbCredentials.Checked)
+			{
+				cbAutoLogin.Enabled = true;
+			}
+			else
+			{
+				cbAutoLogin.Checked = false;
+				cbAutoLogin.Enabled = false;
+			}
+		}
+	}
 }

@@ -1,189 +1,202 @@
 ﻿using System;
-using System.Threading;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace DesktopWorkSetup
 {
-    class AppProfile
-    {
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+	class AppProfile
+	{
+		[DllImport("user32.dll", SetLastError = true)]
+		internal static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
-        public string appNickname;
+		public string appNickname;
 
-        public int positionX;
-        public int positionY;
-        public int width;
-        public int height;
-        
-        public string filePath;
-        public string windowName;
+		public int positionX;
+		public int positionY;
+		public int width;
+		public int height;
 
-        public bool requiresCredentials;
-        public bool isWebsite;
-        public bool isNewTab;
+		public string filePath;
+		public string windowName;
 
-        public int loadTime;
+		public bool requiresCredentials;
+		public bool autoLogin;
+		public bool isWebsite;
+		public bool isNewTab;
 
-        private bool testRun = false;
+		public int loadTime;
 
-        public AppProfile(string _appNickname, int _positionX, int _positionY, int _width, int _height, string _filePath, string _windowName, bool _requiresCredentials, bool _isWebsite, bool _isNewTab, int _loadTime)
-        {
-            appNickname = _appNickname;
+		private bool testRun = false;
 
-            positionX = _positionX;
-            positionY = _positionY;
-            width = _width;
-            height = _height;
+		public AppProfile(string _appNickname, int _positionX, int _positionY, int _width, int _height, string _filePath, string _windowName, bool _requiresCredentials, bool _autoLogin, bool _isWebsite, bool _isNewTab, int _loadTime)
+		{
+			appNickname = _appNickname;
 
-            filePath = _filePath;
-            windowName = _windowName;
+			positionX = _positionX;
+			positionY = _positionY;
+			width = _width;
+			height = _height;
 
-            requiresCredentials = _requiresCredentials;
-            isWebsite = _isWebsite;
-            isNewTab = _isNewTab;
+			filePath = _filePath;
+			windowName = _windowName;
 
-            loadTime = _loadTime;
-        }
+			requiresCredentials = _requiresCredentials;
+			autoLogin = _autoLogin;
+			isWebsite = _isWebsite;
+			isNewTab = _isNewTab;
 
-        public AppProfile(string[] _parse)
-        {
-            appNickname = _parse[0];
+			loadTime = _loadTime;
+		}
 
-            filePath = _parse[1];
-            windowName = _parse[2];
+		public AppProfile(string[] _parse)
+		{
+			appNickname = _parse[0];
 
-            positionX = Int32.Parse(_parse[3]);
-            positionY = Int32.Parse(_parse[4]);
-            width = Int32.Parse(_parse[5]);
-            height = Int32.Parse(_parse[6]);
+			filePath = _parse[1];
+			windowName = _parse[2];
 
-            requiresCredentials = Convert.ToBoolean(_parse[7]);
-            isWebsite = Convert.ToBoolean(_parse[8]);
-            isNewTab = Convert.ToBoolean(_parse[9]);
+			positionX = Int32.Parse(_parse[3]);
+			positionY = Int32.Parse(_parse[4]);
+			width = Int32.Parse(_parse[5]);
+			height = Int32.Parse(_parse[6]);
 
-            loadTime = Int32.Parse(_parse[10]);
-        }
+			requiresCredentials = Convert.ToBoolean(_parse[7]);
+			autoLogin = Convert.ToBoolean(_parse[8]);
+			isWebsite = Convert.ToBoolean(_parse[9]);
+			isNewTab = Convert.ToBoolean(_parse[10]);
 
-        public string[] GetToFileFormat()
-        {
-            string[] format = new string[11];
-            
-            format[0] = appNickname;
+			loadTime = Int32.Parse(_parse[11]);
+		}
 
-            format[1] = filePath;
-            format[2] = windowName;
+		public string[] GetToFileFormat()
+		{
+			string[] format = new string[12];
 
-            format[3] = positionX.ToString();
-            format[4] = positionY.ToString();
-            format[5] = width.ToString();
-            format[6] = height.ToString();
+			format[0] = appNickname;
 
-            format[7] = requiresCredentials.ToString();
-            format[8] = isWebsite.ToString();
-            format[9] = isNewTab.ToString();
+			format[1] = filePath;
+			format[2] = windowName;
 
-            format[10] = loadTime.ToString();
+			format[3] = positionX.ToString();
+			format[4] = positionY.ToString();
+			format[5] = width.ToString();
+			format[6] = height.ToString();
 
-            return format;
-        }
+			format[7] = requiresCredentials.ToString();
+			format[8] = autoLogin.ToString();
+			format[9] = isWebsite.ToString();
+			format[10] = isNewTab.ToString();
 
-        public void Run(string userName, string password)
-        {
-            try
-            {
-                if (isWebsite && !isNewTab)
-                {
-                    Process process = new Process();
-                    process.StartInfo.FileName = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
-                    process.StartInfo.Arguments = filePath + " --new-window";
-                    process.Start();
-                }
-                else
-                {
-                    Process.Start(filePath);
-                }
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show(appNickname + " file path was not found. Application skipped.", "Error");
-                return;
-            }
+			format[11] = loadTime.ToString();
 
+			return format;
+		}
 
-            Thread.Sleep(loadTime);
+		public void Run(string userName, string password, Form parent)
+		{
+			try
+			{
+				if (isWebsite && !isNewTab)
+				{
+					Process process = new Process();
+					process.StartInfo.FileName = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
+					process.StartInfo.Arguments = filePath + " --new-window";
+					process.Start();
+				}
+				else
+				{
+					Process.Start(filePath);
+				}
+			}
+			catch
+			{
+				ErrorWindow.ShowBox("Error", appNickname + "'s file path was not found. Application skipped.", parent);
 
-            try
-            {
-                MoveWindow(GetWindowProcess(windowName).MainWindowHandle, positionX, positionY, width, height, false);
-            }
-            catch(Exception err)
-            {
-                if (!isNewTab)
-                {
-                    MessageBox.Show(appNickname + "'s window name was not found. window move and/or login was skipped.", "Error");
-                    return;
-                }
-                else if (requiresCredentials)
-                {
-                    if (MessageBox.Show(appNickname + "'s window name was not found. Do you wish to attempt login?", "Error", MessageBoxButtons.YesNo) == DialogResult.No)
-                    {
-                        return;
-                    }
-                }
-            }
-            
-            if (requiresCredentials)
-            {
-                for (int index = 0; index < userName.Length; index++)
-                {
-                    SendKeys.SendWait(userName[index].ToString());
-                    Thread.Sleep(10);
-                }
+				return;
+			}
 
-                if (!testRun)
-                {
-                    SendKeys.SendWait("{TAB}");
-                    for (int index = 0; index < password.Length; index++)
-                    {
-                        SendKeys.SendWait(password[index].ToString());
-                        Thread.Sleep(10);
-                    }
-                    SendKeys.SendWait("{ENTER}");
-                    testRun = false;
-                }
-                
-                if (isNewTab)
-                {
-                    SendKeys.SendWait("^1");
-                }
-            }
-        }
+			Thread.Sleep(loadTime);
 
-        public void Test()
-        {
-            testRun = true;
-            Run("TESTING", "");
-        }
+			try
+			{
+				if (!isNewTab)
+					MoveWindow(GetWindowProcess(windowName).MainWindowHandle, positionX, positionY, width, height, false);
+			}
+			catch
+			{
+				if (!isNewTab)
+				{
+					ErrorWindow.ShowBox("Error", appNickname + "'s window name was not found. window move and/or login was skipped.", parent);
+					return;
+				}
+				else if (requiresCredentials)
+				{
+					if (ErrorWindow.ShowBox("Error", appNickname + "'s file path was not found. Application skipped.", MessageBoxButtons.YesNo, parent) == DialogResult.No)
+					{
+						return;
+					}
+				}
+			}
 
-        private Process GetWindowProcess(string windowTitle)
-        {
-            Process[] procs = Process.GetProcesses();
+			if (requiresCredentials)
+			{
+				for (int index = 0; index < userName.Length; index++)
+				{
+					SendKeys.SendWait(userName[index].ToString());
+					Thread.Sleep(10);
+				}
 
-            foreach (var proc in procs)
-            {
-                try
-                {
-                    if (proc.MainWindowTitle == windowTitle)
-                    {
-                        return proc;
-                    }
-                }
-                catch { }
-            }
-            return new Process();
-        }
-    }
+				if (!testRun)
+				{
+					SendKeys.SendWait("{TAB}");
+					for (int index = 0; index < password.Length; index++)
+					{
+						SendKeys.SendWait(password[index].ToString());
+						Thread.Sleep(10);
+					}
+
+					if (autoLogin)
+					{
+						SendKeys.SendWait("{ENTER}");
+					}
+
+					if (testRun)
+					{
+						testRun = false;
+					}
+				}
+
+				if (isNewTab)
+				{
+					SendKeys.SendWait("^1");
+				}
+			}
+		}
+
+		public void Test(Form parent)
+		{
+			testRun = true;
+			Run("TESTING", "", parent);
+		}
+
+		private Process GetWindowProcess(string windowTitle)
+		{
+			Process[] procs = Process.GetProcesses();
+
+			foreach (var proc in procs)
+			{
+				try
+				{
+					if (proc.MainWindowTitle == windowTitle)
+					{
+						return proc;
+					}
+				}
+				catch { }
+			}
+			return new Process();
+		}
+	}
 }

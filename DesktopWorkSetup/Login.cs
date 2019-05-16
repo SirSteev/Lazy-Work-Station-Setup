@@ -1,170 +1,222 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
+using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
 
 namespace DesktopWorkSetup
 {
-    public partial class Login : Form
-    {
-        private ProfileSetup profileSetup;
-        List<AppProfile> appProfiles = new List<AppProfile>();
+	public partial class Login : Form
+	{
+		private ProfileSetup profileSetup;
+		readonly List<AppProfile> appProfiles = new List<AppProfile>();
 
-        public string wantedProfile = string.Empty;
+		public string wantedProfile = string.Empty;
 
-        public Login()
-        {
-            InitializeComponent();
-        }
+		public Login()
+		{
+			InitializeComponent();
+		}
 
-        private void btnRunProfile_Click(object sender, EventArgs e)
-        {
-            RunProfile();
-        }
+		private void btnRunProfile_Click(object sender, EventArgs e)
+		{
+			RunProfile();
+		}
 
-        private void tbPassword_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                if (lbProfiles.SelectedItem != null)
-                {
-                    RunProfile();
-                }
-            }
-        }
-        
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            UpdateProfilesList();
+		private void tbPassword_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.Enter)
+			{
+				if (lbProfiles.SelectedItem != null)
+				{
+					RunProfile();
+				}
+			}
+		}
 
-            if (lbProfiles.Items.Count > 0)
-            {
-                lbProfiles.SelectedIndex = 0;
-            }
-        }
+		private void Form1_Load(object sender, EventArgs e)
+		{
+			UpdateProfilesList();
 
-        private void lbProfiles_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (lbProfiles.SelectedItem != null)
-            {
-                btnRunSetup.Enabled = true;
-            }
-            else
-            {
-                btnRunSetup.Enabled = false;
-            }
-        }
-        
-        private void btnNewProfile_Click(object sender, EventArgs e)
-        {
-            profileSetup = new ProfileSetup(string.Empty, this);
-            profileSetup.Show();
-        }
+			if (lbProfiles.Items.Count > 0)
+			{
+				lbProfiles.SelectedIndex = 0;
+			}
 
-        private void btnEditProfile_Click(object sender, EventArgs e)
-        {
-            if (lbProfiles.SelectedItem != null)
-            {
-                wantedProfile = lbProfiles.SelectedItem.ToString();
-            }
+			if (lbProfiles.SelectedItem == null)
+			{
+				btnDeleteProfile.Enabled = false;
+				btnEditProfile.Enabled = false;
+			}
+		}
 
-            this.Visible = false;
+		private void lbProfiles_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (lbProfiles.SelectedItem != null)
+			{
+				btnRunSetup.Enabled = true;
+				btnDeleteProfile.Enabled = true;
+				btnEditProfile.Enabled = true;
+			}
+			else
+			{
+				btnRunSetup.Enabled = false;
+			}
+		}
 
-            profileSetup = new ProfileSetup(wantedProfile, this);
-            profileSetup.Show();
-        }
+		private void btnNewProfile_Click(object sender, EventArgs e)
+		{
+			profileSetup = new ProfileSetup(string.Empty, this);
 
-        private void btnDeleteProfile_Click(object sender, EventArgs e)
-        {
-            if (lbProfiles.SelectedItem != null)
-            {
-                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments), "Desktop Work Setup", lbProfiles.SelectedItem.ToString());
+			Point NewPoint = new Point();
 
-                string[] files = Directory.GetFiles(path);
+			NewPoint.X = this.Location.X + this.Size.Width / 2 - profileSetup.Size.Width / 2;
+			NewPoint.Y = this.Location.Y + this.Size.Height / 2 - profileSetup.Size.Height / 2;
 
-                foreach (string file in files)
-                {
-                    File.Delete(file);
-                }
-                
-                Directory.Delete(path);
+			profileSetup.Location = NewPoint;
 
-                UpdateProfilesList();
-            }
-            else
-            {
-                MessageBox.Show("No profile has been selected.", "Error");
-            }
-        }
+			profileSetup.Show();
 
-        public void ProfileFormExit(bool userClose)
-        {
-            if (!userClose)
-            {
-                profileSetup.Close();
-            }
+			this.Visible = false;
+		}
 
-            UpdateProfilesList();
+		private void btnEditProfile_Click(object sender, EventArgs e)
+		{
+			if (lbProfiles.SelectedItem != null)
+			{
+				wantedProfile = lbProfiles.SelectedItem.ToString();
+			}
 
-            this.Visible = true;
+			this.Visible = false;
 
-        }
+			profileSetup = new ProfileSetup(wantedProfile, this);
 
-        private void UpdateProfilesList()
-        {
-            lbProfiles.Items.Clear();
+			Point NewPoint = new Point();
 
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments), "Desktop Work Setup");
+			NewPoint.X = this.Location.X + this.Size.Width / 2 - profileSetup.Size.Width / 2;
+			NewPoint.Y = this.Location.Y + this.Size.Height / 2 - profileSetup.Size.Height / 2;
 
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
+			profileSetup.Location = NewPoint;
 
-            foreach (string folderName in Directory.GetDirectories(path))
-            {
-                string[] words = folderName.Split('\\');
+			profileSetup.Show();
+		}
 
-                lbProfiles.Items.Add(words[words.Length - 1]);
-            }
+		private void btnDeleteProfile_Click(object sender, EventArgs e)
+		{
+			if (lbProfiles.SelectedItem != null)
+			{
+				string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments), "Desktop Work Setup", lbProfiles.SelectedItem.ToString()).Replace("*", "");
 
-            btnRunSetup.Enabled = false;
-        }
+				string[] files = Directory.GetFiles(path);
 
-        private void RunProfile()
-        {
-            btnRunSetup.Enabled = false;
-            btnSetupProfile.Enabled = false;
-            tbUserName.Enabled = false;
-            tbPassword.Enabled = false;
-            btnDeleteProfile.Enabled = false;
-            lbProfiles.Enabled = false;
+				try
+				{
+					foreach (string file in files)
+					{
+						File.Delete(file);
+					}
 
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments), "Desktop Work Setup", lbProfiles.SelectedItem.ToString());
+					Directory.Delete(path);
+				}
+				catch
+				{
+					ErrorWindow.ShowBox("Error", "Unknown Item in selected Profile's folder.", this);
+				}
 
-            string[] files = Directory.GetFiles(path);
+				UpdateProfilesList();
+			}
+			else
+			{
+				ErrorWindow.ShowBox("Error", "No profile has been selected.", this);
+			}
+		}
 
-            foreach (string file in files)
-            {
-                string[] fileLines = File.ReadAllLines(file);
-                appProfiles.Add(new AppProfile(fileLines));
-            }
+		public void ProfileFormExit(bool userClose)
+		{
+			if (!userClose)
+			{
+				profileSetup.Close();
+			}
 
-            foreach (AppProfile appProfile in appProfiles)
-            {
-                appProfile.Run(tbUserName.Text, tbPassword.Text);
-            }
+			UpdateProfilesList();
 
-            tbUserName.Text = string.Empty;
-            tbPassword.Text = string.Empty;
+			Point NewPoint = new Point();
 
-            if (MessageBox.Show("Your desktop has been setup.", "Done", MessageBoxButtons.OK) == DialogResult.OK)
-                Application.Exit();
-        }
+			NewPoint.X = profileSetup.Location.X + profileSetup.Size.Width / 2 - this.Size.Width / 2;
+			NewPoint.Y = profileSetup.Location.Y + profileSetup.Size.Height / 2 - this.Size.Height / 2;
 
-        private void btnOpenGitHub_Click(object sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start("https://github.com/SirSteev/Lazy-Work-Station-Setup");
-        }
-    }
+			this.Location = NewPoint;
+
+			this.Visible = true;
+		}
+
+		private void UpdateProfilesList()
+		{
+			lbProfiles.Items.Clear();
+
+			string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments), "Desktop Work Setup");
+
+			if (!Directory.Exists(path))
+			{
+				Directory.CreateDirectory(path);
+			}
+
+			foreach (string folderName in Directory.GetDirectories(path))
+			{
+				string[] words = folderName.Split('\\');
+
+				lbProfiles.Items.Add(words[words.Length - 1]);
+
+				string[] files = Directory.GetFiles(folderName);
+
+				foreach (string file in files)
+				{
+					string[] fileLines = File.ReadAllLines(file);
+					if (fileLines[7] == "True")
+					{
+						lbProfiles.Items[lbProfiles.Items.Count - 1] = lbProfiles.Items[lbProfiles.Items.Count - 1] + "*";
+						break;
+					}
+				}
+			}
+
+			btnRunSetup.Enabled = false;
+		}
+
+		private void RunProfile()
+		{
+			btnRunSetup.Enabled = false;
+			btnSetupProfile.Enabled = false;
+			tbUserName.Enabled = false;
+			tbPassword.Enabled = false;
+			btnDeleteProfile.Enabled = false;
+			lbProfiles.Enabled = false;
+
+			string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments), "Desktop Work Setup", lbProfiles.SelectedItem.ToString()).Replace("*", "");
+
+			string[] files = Directory.GetFiles(path);
+
+			foreach (string file in files)
+			{
+				string[] fileLines = File.ReadAllLines(file);
+				appProfiles.Add(new AppProfile(fileLines));
+			}
+
+			foreach (AppProfile appProfile in appProfiles)
+			{
+				appProfile.Run(tbUserName.Text, tbPassword.Text, this);
+			}
+
+			tbUserName.Text = string.Empty;
+			tbPassword.Text = string.Empty;
+
+			if (ErrorWindow.ShowBox("Done", "Your desktop has been setup.", this) == DialogResult.OK)
+				Application.Exit();
+		}
+
+		private void btnOpenGitHub_Click(object sender, EventArgs e)
+		{
+			System.Diagnostics.Process.Start("https://github.com/SirSteev/Lazy-Work-Station-Setup");
+		}
+	}
 }
