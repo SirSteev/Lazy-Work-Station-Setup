@@ -21,6 +21,11 @@ namespace DesktopWorkSetup
 		private void btnRunProfile_Click(object sender, EventArgs e)
 		{
 			RunProfile();
+
+			this.Activate();
+
+			if (ErrorWindow.ShowBox("Done", "Your desktop has been setup.", this) == DialogResult.OK)
+				Application.Exit();
 		}
 
 		private void tbPassword_KeyUp(object sender, KeyEventArgs e)
@@ -29,7 +34,7 @@ namespace DesktopWorkSetup
 			{
 				if (lbProfiles.SelectedItem != null)
 				{
-					RunProfile();
+					btnRunProfile_Click(sender, e);
 				}
 			}
 		}
@@ -187,6 +192,7 @@ namespace DesktopWorkSetup
 		{
 			btnRunSetup.Enabled = false;
 			btnSetupProfile.Enabled = false;
+			btnEditProfile.Enabled = false;
 			tbUserName.Enabled = false;
 			tbPassword.Enabled = false;
 			btnDeleteProfile.Enabled = false;
@@ -209,9 +215,6 @@ namespace DesktopWorkSetup
 
 			tbUserName.Text = string.Empty;
 			tbPassword.Text = string.Empty;
-
-			if (ErrorWindow.ShowBox("Done", "Your desktop has been setup.", this) == DialogResult.OK)
-				Application.Exit();
 		}
 
 		private void btnOpenGitHub_Click(object sender, EventArgs e)

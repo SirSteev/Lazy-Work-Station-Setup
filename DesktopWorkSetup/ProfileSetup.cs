@@ -145,8 +145,6 @@ namespace DesktopWorkSetup
 				ErrorWindow.ShowBox("Error", "Program failed to load in time / was not found.", this);
 				return;
 			}
-
-
 		}
 
 		private void btnRestart_Click(object sender, EventArgs e)
@@ -258,6 +256,8 @@ namespace DesktopWorkSetup
 				appProfile.Test(this);
 			}
 
+			this.Activate();
+
 			btnFinished.Enabled = true;
 		}
 
@@ -279,7 +279,6 @@ namespace DesktopWorkSetup
 			{
 				ErrorWindow.ShowBox("Error", "No application has been selected.", this);
 			}
-
 		}
 
 		private void btnEditSelected_Click(object sender, EventArgs e)

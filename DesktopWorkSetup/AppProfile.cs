@@ -119,24 +119,26 @@ namespace DesktopWorkSetup
 
 			Thread.Sleep(loadTime);
 
-			try
+			if (!isNewTab)
 			{
-				if (!isNewTab)
+				try
+				{
 					MoveWindow(GetWindowProcess(windowName).MainWindowHandle, positionX, positionY, width, height, false);
-			}
-			catch
-			{
-				if (!isNewTab)
-				{
-					ErrorWindow.ShowBox("Error", appNickname + "'s window name was not found. window move and/or login was skipped.", parent);
-					return;
 				}
-				else if (requiresCredentials)
+				catch
 				{
-					if (ErrorWindow.ShowBox("Error", appNickname + "'s file path was not found. Application skipped.", MessageBoxButtons.YesNo, parent) == DialogResult.No)
+					if (requiresCredentials)
 					{
-						return;
+						if (ErrorWindow.ShowBox("Error", appNickname + "'s window did not load in time and was not found. Do you wish to attempt Login anyway?.", MessageBoxButtons.YesNo, parent) == DialogResult.No)
+						{
+							return;
+						}
 					}
+					else
+					{
+						ErrorWindow.ShowBox("Error", appNickname + "'s window did not load in time.", MessageBoxButtons.OK, parent);
+					}
+					
 				}
 			}
 
@@ -161,15 +163,16 @@ namespace DesktopWorkSetup
 					{
 						SendKeys.SendWait("{ENTER}");
 					}
+				}
 
-					if (testRun)
-					{
-						testRun = false;
-					}
+				if (testRun)
+				{
+					testRun = false;
 				}
 
 				if (isNewTab)
 				{
+					Thread.Sleep(10);
 					SendKeys.SendWait("^1");
 				}
 			}

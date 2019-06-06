@@ -12,6 +12,8 @@ C:\Users\slamountain\source\repos\DesktopWorkSetup\DesktopWorkSetup\obj\Debug\De
 C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\bin\Debug\DesktopWorkSetup.exe.config
 C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\bin\Debug\DesktopWorkSetup.exe
 C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\bin\Debug\DesktopWorkSetup.pdb
+C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.csprojAssemblyReference.cache
+C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.ErrorWindow.resources
 C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.Login.resources
 C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.ProfileSetup.resources
 C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.Properties.Resources.resources
@@ -19,5 +21,3 @@ C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj
 C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.csproj.CoreCompileInputs.cache
 C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.exe
 C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.pdb
-C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.csprojAssemblyReference.cache
-C:\Users\slamountain\Desktop\Lazy-Work-Station-Setup-master\DesktopWorkSetup\obj\Debug\DesktopWorkSetup.ErrorWindow.resources
